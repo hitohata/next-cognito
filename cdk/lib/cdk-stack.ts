@@ -1,16 +1,37 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import {Stack} from "aws-cdk-lib";
+import {UserPool} from "aws-cdk-lib/aws-cognito";
+import * as appsync from "aws-cdk-lib/aws-appsync";
+import * as path from "node:path";
 
 export class CdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
+    const userPool = this.userPool(this);
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'CdkQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+  }
+
+  userPool(stack: Stack) {
+    return new UserPool(stack, 'UserPool', {
+      userPoolName: "next-cog",
+      selfSignUpEnabled: true,
+    })
+  }
+
+  appSync(stack: Stack, userPool: UserPool) {
+    return new appsync.GraphqlApi(stack, 'AppSync', {
+      name: 'next-app-api',
+      definition: appsync.Definition.fromFile(path.join(__dirname, "../schema.graphql")),
+      authorizationConfig: {
+        defaultAuthorization: {
+          authorizationType: appsync.AuthorizationType.USER_POOL,
+          userPoolConfig: {
+            userPool
+          }
+        }
+      }
+    })
   }
 }
