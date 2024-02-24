@@ -1,9 +1,14 @@
 import * as path from "node:path";
 import * as cdk from "aws-cdk-lib";
-import {RemovalPolicy} from "aws-cdk-lib";
+import { RemovalPolicy } from "aws-cdk-lib";
 import * as appsync from "aws-cdk-lib/aws-appsync";
-import {AccountRecovery, StringAttribute, UserPool, VerificationEmailStyle} from "aws-cdk-lib/aws-cognito";
-import { Construct} from "constructs";
+import {
+	AccountRecovery,
+	StringAttribute,
+	UserPool,
+	VerificationEmailStyle,
+} from "aws-cdk-lib/aws-cognito";
+import { Construct } from "constructs";
 
 export class CdkStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -11,7 +16,7 @@ export class CdkStack extends cdk.Stack {
 
 		const userPool = this.userPool();
 		this.userPoolClient(userPool);
-        this.appSync(userPool);
+		this.appSync(userPool);
 	}
 
 	userPool() {
@@ -21,7 +26,7 @@ export class CdkStack extends cdk.Stack {
 			signInAliases: {
 				email: true,
 				username: false,
-				phone: false
+				phone: false,
 			},
 			autoVerify: { email: true },
 			userVerification: {
@@ -31,7 +36,7 @@ export class CdkStack extends cdk.Stack {
 				name: new StringAttribute({ minLen: 1, maxLen: 256, mutable: true }),
 			},
 			accountRecovery: AccountRecovery.EMAIL_ONLY,
-			removalPolicy: RemovalPolicy.DESTROY
+			removalPolicy: RemovalPolicy.DESTROY,
 		});
 	}
 
