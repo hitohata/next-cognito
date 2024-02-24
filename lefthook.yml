@@ -8,7 +8,7 @@
    commands:
      cdk:
        root: front
-       run: bunx @biomejs/biome check . --apply
+       run: npx @biomejs/biome check . --apply
      front:
        root: cdk
-       run: bunx @biomejs/biome check . --apply
+       run: npx @biomejs/biome check . --apply
