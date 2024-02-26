@@ -7,8 +7,5 @@
    parallel: true
    commands:
      cdk:
-       root: front
-       run: npx @biomejs/biome check . --apply
-     front:
        root: cdk
        run: npx @biomejs/biome check . --apply

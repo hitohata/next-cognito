@@ -2,15 +2,15 @@ import * as path from "node:path";
 import * as cdk from "aws-cdk-lib";
 import { RemovalPolicy } from "aws-cdk-lib";
 import * as appsync from "aws-cdk-lib/aws-appsync";
+import { GraphqlApi, Resolver } from "aws-cdk-lib/aws-appsync";
 import {
 	AccountRecovery,
 	StringAttribute,
 	UserPool,
 	VerificationEmailStyle,
 } from "aws-cdk-lib/aws-cognito";
+import { RustFunction } from "cargo-lambda-cdk";
 import { Construct } from "constructs";
-import {GraphqlApi, Resolver} from "aws-cdk-lib/aws-appsync";
-import {RustFunction} from "cargo-lambda-cdk";
 
 export class CdkStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -74,12 +74,15 @@ export class CdkStack extends cdk.Stack {
 		const resolver = new RustFunction(this, "demo-function", {
 			functionName: "demo-app-sync-function",
 			manifestPath: path.join(__dirname, "../graphql/resolver/Cargo.toml"),
-			runtime: "provided.al2023"
-		})
-		const dataSource = api.addLambdaDataSource("demo-lambda-data-source", resolver);
+			runtime: "provided.al2023",
+		});
+		const dataSource = api.addLambdaDataSource(
+			"demo-lambda-data-source",
+			resolver,
+		);
 		dataSource.createResolver("get-demos", {
 			typeName: "Query",
 			fieldName: "getDemos",
-		})
+		});
 	}
 }
