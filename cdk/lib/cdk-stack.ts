@@ -9,6 +9,8 @@ import {
 	VerificationEmailStyle,
 } from "aws-cdk-lib/aws-cognito";
 import { Construct } from "constructs";
+import {GraphqlApi, Resolver} from "aws-cdk-lib/aws-appsync";
+import {RustFunction} from "cargo-lambda-cdk";
 
 export class CdkStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -16,7 +18,8 @@ export class CdkStack extends cdk.Stack {
 
 		const userPool = this.userPool();
 		this.userPoolClient(userPool);
-		this.appSync(userPool);
+		const api = this.appSync(userPool);
+		this.resolvers(api);
 	}
 
 	userPool() {
@@ -65,5 +68,18 @@ export class CdkStack extends cdk.Stack {
 				},
 			},
 		});
+	}
+
+	resolvers(api: GraphqlApi) {
+		const resolver = new RustFunction(this, "demo-function", {
+			functionName: "demo-app-sync-function",
+			manifestPath: path.join(__dirname, "../graphql/resolver/Cargo.toml"),
+			runtime: "provided.al2023"
+		})
+		const dataSource = api.addLambdaDataSource("demo-lambda-data-source", resolver);
+		dataSource.createResolver("get-demos", {
+			typeName: "Query",
+			fieldName: "getDemos",
+		})
 	}
 }
