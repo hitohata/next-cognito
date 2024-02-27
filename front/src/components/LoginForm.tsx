@@ -1,27 +1,27 @@
-'use client';
+"use client";
 
-import { Authenticator } from '@aws-amplify/ui-react';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect } from 'react';
-import { configureClientAmplify } from '@/utils/apmlify/amplifyClientSetting';
-import '@aws-amplify/ui-react/styles.css';
-import {getToken} from "@/lib/api/auth/authToken.client";
+import { getToken } from "@/lib/api/auth/authToken.client";
+import { configureClientAmplify } from "@/utils/apmlify/amplifySetting.client";
+import { Authenticator } from "@aws-amplify/ui-react";
+import "@aws-amplify/ui-react/styles.css";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect } from "react";
 
 configureClientAmplify();
 
 export const LoginForm = () => {
-    const router = useRouter();
+	const router = useRouter();
 
-  const checkSession = useCallback(async () => {
-    const idToken = await getToken();
-    if (idToken) {
-      router.push('/some-page');
-    }
-  }, [router]);
+	const checkSession = useCallback(async () => {
+		const idToken = await getToken();
+		if (idToken) {
+			router.push("/ssr-page");
+		}
+	}, [router]);
 
-  useEffect(() => {
-    checkSession();
-  }, []);
+	useEffect(() => {
+		checkSession();
+	}, []);
 
-  return <Authenticator loginMechanisms={['email']} />
-}
+	return <Authenticator loginMechanisms={["email"]} />;
+};

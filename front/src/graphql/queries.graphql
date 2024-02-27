@@ -1,0 +1,9 @@
+# this is an auto generated file. This will be overwritten
+
+query GetDemos {
+  getDemos {
+    id
+    version
+    __typename
+  }
+}

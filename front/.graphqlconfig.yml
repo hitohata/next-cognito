@@ -1,0 +1,14 @@
+projects:
+  amplifyjsapp:
+    schemaPath: ../cdk/graphql/schema.graphql
+    includes:
+      - 'src/graphql/*.graphql'
+    excludes: []
+    extensions:
+      amplify:
+        codeGenTarget: typescript
+        generatedFileName: src/API.ts
+        docsFilePath: src/graphql
+extensions:
+  amplify:
+    version: 3

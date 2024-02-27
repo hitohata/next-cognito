@@ -1,5 +1,5 @@
-import { configureClientAmplify } from '@/utils/apmlify/amplifyClientSetting'
-import { fetchAuthSession } from 'aws-amplify/auth'
+import { configureClientAmplify } from "@/utils/apmlify/amplifySetting.client";
+import { fetchAuthSession } from "aws-amplify/auth";
 
 // client side setting
 configureClientAmplify();
@@ -10,6 +10,6 @@ configureClientAmplify();
  * @return AuthToken that is JWT
  */
 export const getToken = async () => {
-    const session = await fetchAuthSession();
-    return session?.tokens?.idToken?.toString() || null
-}
+	const session = await fetchAuthSession();
+	return session?.tokens?.idToken?.toString() || null;
+};
