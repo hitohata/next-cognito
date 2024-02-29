@@ -6,6 +6,7 @@ import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
+import { Hub } from "@aws-amplify/core";
 
 configureClientAmplify();
 
@@ -23,5 +24,15 @@ export const LoginForm = () => {
 		checkSession();
 	}, []);
 
-	return <Authenticator loginMechanisms={["email"]} />;
+	// watch an auth events
+	// when sign in is completed, redirect to the '/ssr-page'
+	useEffect(() => {
+		Hub.listen("auth", (data) => {
+			if (data?.payload?.event === "signedIn") {
+				router.push("/ssr-page");
+			}
+		})
+	}, [])
+
+	return <Authenticator loginMechanisms={["email"]} socialProviders={['google']} />;
 };

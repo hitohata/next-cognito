@@ -1,8 +1,9 @@
-import {serverClient} from "@/utils/client/serverClient";
-import {GetDemosQuery} from "@/API";
-import {GraphQLResult} from "@aws-amplify/api-graphql";
-import {DemoComponent} from "@/components/DemoComponent";
-import {ClientDemos} from "@/components/ClientDemos";
+import { serverClient } from "@/utils/client/serverClient";
+import { GetDemosQuery } from "@/API";
+import { GraphQLResult } from "@aws-amplify/api-graphql";
+import { DemoComponent } from "@/components/DemoComponent";
+import { ClientDemos } from "@/components/ClientDemos";
+import { SignOutButton } from "@/components/SighOutButton";
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +34,7 @@ export default async function SSRPage() {
 
      return (
          <>
+             <SignOutButton />
              <div>Server Side Rendering</div>
              {data.getDemos?.map((el, index) => (
                      <div key={index}>

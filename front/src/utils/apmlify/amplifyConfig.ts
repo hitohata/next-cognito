@@ -12,20 +12,20 @@ export const amplifyConfig: ResourcesConfig = {
 	Auth: {
 		Cognito: {
 			userPoolId: USER_POOL_ID,
-			signUpVerificationMethod: "code", // 'code' | 'link'
 			userPoolClientId: USER_POOL_CLIENT_ID,
 			userAttributes: {
 				name: { required: true },
 			},
-			// loginWith: {
-			//   oauth: {
-			//     domain: OAUTH_DOMAIN,
-			//     scopes: ['openid'],
-			//     responseType: 'code',
-			//     redirectSignIn: [LOCALHOST_URL + '/login'],
-			//     redirectSignOut: [LOCALHOST_URL, OAUTH_REDIRECT_URL],
-			//   },
-			// },
+			signUpVerificationMethod: "code", // 'code' | 'link'
+			loginWith: {
+			  oauth: {
+			    domain: OAUTH_DOMAIN,
+			    scopes: ['openid'],
+			    responseType: 'code',
+			    redirectSignIn: [LOCALHOST_URL + '/login'],
+			    redirectSignOut: [LOCALHOST_URL, OAUTH_REDIRECT_URL],
+			  },
+			},
 		},
 	},
 	API: {

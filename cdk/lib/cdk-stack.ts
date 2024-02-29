@@ -2,15 +2,16 @@ import * as path from "node:path";
 import * as cdk from "aws-cdk-lib";
 import { RemovalPolicy } from "aws-cdk-lib";
 import * as appsync from "aws-cdk-lib/aws-appsync";
-import { GraphqlApi, Resolver } from "aws-cdk-lib/aws-appsync";
+import { GraphqlApi } from "aws-cdk-lib/aws-appsync";
 import {
-	AccountRecovery,
+	AccountRecovery, OAuthScope, ProviderAttribute,
 	StringAttribute,
-	UserPool,
+	UserPool, UserPoolClientIdentityProvider, UserPoolIdentityProviderGoogle,
 	VerificationEmailStyle,
 } from "aws-cdk-lib/aws-cognito";
 import { RustFunction } from "cargo-lambda-cdk";
 import { Construct } from "constructs";
+import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 
 export class CdkStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -18,6 +19,7 @@ export class CdkStack extends cdk.Stack {
 
 		const userPool = this.userPool();
 		this.userPoolClient(userPool);
+		this.addGoogleAuth(userPool);
 		const api = this.appSync(userPool);
 		this.resolvers(api);
 	}
@@ -46,11 +48,49 @@ export class CdkStack extends cdk.Stack {
 	userPoolClient(userPool: UserPool) {
 		userPool.addClient("next-app-client", {
 			userPoolClientName: "next-front",
+			supportedIdentityProviders: [
+				UserPoolClientIdentityProvider.GOOGLE,
+				UserPoolClientIdentityProvider.COGNITO
+			],
 			authFlows: {
 				userPassword: true,
 				userSrp: true,
 			},
+			oAuth: {
+				flows: {
+					authorizationCodeGrant: true,
+				},
+				scopes: [
+					OAuthScope.EMAIL,
+					OAuthScope.OPENID,
+					OAuthScope.PROFILE,
+					OAuthScope.COGNITO_ADMIN,
+				],
+				callbackUrls: ["http://localhost:3000/login", "https://next-auth-testtesttesttest.auth.us-west-2.amazoncognito.com"],
+			},
 		});
+	}
+
+	addGoogleAuth(userPool: UserPool) {
+		userPool.addDomain("CognitoDomain", {
+			cognitoDomain: {
+				domainPrefix: "next-auth-testtesttesttest"
+			}
+		});
+
+		const provider = Secret.fromSecretNameV2(this, 'google-secret', "oauth/google/keys");
+
+		new UserPoolIdentityProviderGoogle(this, "GoogleProvider", {
+			userPool,
+			clientId: provider.secretValueFromJson("clientId").unsafeUnwrap(),
+			clientSecretValue: provider.secretValueFromJson("clientSecret"),
+			scopes: ["profile", "email", "openid"],
+			attributeMapping: {
+				email: ProviderAttribute.GOOGLE_EMAIL,
+				nickname: ProviderAttribute.GOOGLE_NAME
+			}
+		});
+
 	}
 
 	appSync(userPool: UserPool) {
