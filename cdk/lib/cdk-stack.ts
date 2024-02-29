@@ -4,14 +4,18 @@ import { RemovalPolicy } from "aws-cdk-lib";
 import * as appsync from "aws-cdk-lib/aws-appsync";
 import { GraphqlApi } from "aws-cdk-lib/aws-appsync";
 import {
-	AccountRecovery, OAuthScope, ProviderAttribute,
+	AccountRecovery,
+	OAuthScope,
+	ProviderAttribute,
 	StringAttribute,
-	UserPool, UserPoolClientIdentityProvider, UserPoolIdentityProviderGoogle,
+	UserPool,
+	UserPoolClientIdentityProvider,
+	UserPoolIdentityProviderGoogle,
 	VerificationEmailStyle,
 } from "aws-cdk-lib/aws-cognito";
+import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { RustFunction } from "cargo-lambda-cdk";
 import { Construct } from "constructs";
-import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 
 export class CdkStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -50,7 +54,7 @@ export class CdkStack extends cdk.Stack {
 			userPoolClientName: "next-front",
 			supportedIdentityProviders: [
 				UserPoolClientIdentityProvider.GOOGLE,
-				UserPoolClientIdentityProvider.COGNITO
+				UserPoolClientIdentityProvider.COGNITO,
 			],
 			authFlows: {
 				userPassword: true,
@@ -66,7 +70,10 @@ export class CdkStack extends cdk.Stack {
 					OAuthScope.PROFILE,
 					OAuthScope.COGNITO_ADMIN,
 				],
-				callbackUrls: ["http://localhost:3000/login", "https://next-auth-testtesttesttest.auth.us-west-2.amazoncognito.com"],
+				callbackUrls: [
+					"http://localhost:3000/login",
+					"https://next-auth-testtesttesttest.auth.us-west-2.amazoncognito.com",
+				],
 			},
 		});
 	}
@@ -74,11 +81,15 @@ export class CdkStack extends cdk.Stack {
 	addGoogleAuth(userPool: UserPool) {
 		userPool.addDomain("CognitoDomain", {
 			cognitoDomain: {
-				domainPrefix: "next-auth-testtesttesttest"
-			}
+				domainPrefix: "next-auth-testtesttesttest",
+			},
 		});
 
-		const provider = Secret.fromSecretNameV2(this, 'google-secret', "oauth/google/keys");
+		const provider = Secret.fromSecretNameV2(
+			this,
+			"google-secret",
+			"oauth/google/keys",
+		);
 
 		new UserPoolIdentityProviderGoogle(this, "GoogleProvider", {
 			userPool,
@@ -87,10 +98,9 @@ export class CdkStack extends cdk.Stack {
 			scopes: ["profile", "email", "openid"],
 			attributeMapping: {
 				email: ProviderAttribute.GOOGLE_EMAIL,
-				nickname: ProviderAttribute.GOOGLE_NAME
-			}
+				nickname: ProviderAttribute.GOOGLE_NAME,
+			},
 		});
-
 	}
 
 	appSync(userPool: UserPool) {
