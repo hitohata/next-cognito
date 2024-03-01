@@ -34,7 +34,10 @@ export class CdkStack extends cdk.Stack {
 		this.gqlClient(api);
 	}
 
-	userPool(preSignupFunction: NodejsFunction, postSignupFunction: NodejsFunction) {
+	userPool(
+		preSignupFunction: NodejsFunction,
+		postSignupFunction: NodejsFunction,
+	) {
 		const userPool = new UserPool(this, "UserPool", {
 			userPoolName: "next-cog",
 			selfSignUpEnabled: true,
@@ -150,9 +153,9 @@ export class CdkStack extends cdk.Stack {
 				},
 				additionalAuthorizationModes: [
 					{
-						authorizationType: appsync.AuthorizationType.IAM
-					}
-				]
+						authorizationType: appsync.AuthorizationType.IAM,
+					},
+				],
 			},
 		});
 	}
@@ -202,7 +205,7 @@ export class CdkStack extends cdk.Stack {
 				"../lambda/signup/package-lock.json",
 			),
 			timeout: Duration.seconds(5),
-		})
+		});
 	}
 
 	gqlClient(api: GraphqlApi) {
@@ -217,20 +220,20 @@ export class CdkStack extends cdk.Stack {
 			),
 			timeout: Duration.seconds(5),
 			environment: {
-				URL: api.graphqlUrl
-			}
+				URL: api.graphqlUrl,
+			},
 		});
 
 		client.role?.attachInlinePolicy(
 			new iam.Policy(this, "iam-app-sync-policy", {
 				statements: [
 					new iam.PolicyStatement({
-						actions: ['appsync:GraphQL'],
-						resources: [`${api.arn}/*`]
-					})
-				]
-			})
-		)
+						actions: ["appsync:GraphQL"],
+						resources: [`${api.arn}/*`],
+					}),
+				],
+			}),
+		);
 
 		// const role = new iam.Role(this, "role", {
 		// 	assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com")

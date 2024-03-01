@@ -1,8 +1,11 @@
-import {PostAuthenticationTriggerHandler, PostConfirmationConfirmSignUpTriggerEvent} from "aws-lambda";
+import {
+	PostAuthenticationTriggerHandler,
+	PostConfirmationConfirmSignUpTriggerEvent,
+} from "aws-lambda";
 
 export const handler = async (
-    event:  PostConfirmationConfirmSignUpTriggerEvent
+	event: PostConfirmationConfirmSignUpTriggerEvent,
 ) => {
-    console.log(event);
-    return event
-}
+	console.log(event);
+	return event;
+};
