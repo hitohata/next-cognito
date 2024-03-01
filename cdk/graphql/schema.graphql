@@ -1,4 +1,6 @@
-type demo {
+directive @aws_iam on FIELD_DEFINITION
+
+type demo @aws_iam {
   id: String!
   version: String!
 }
@@ -9,5 +11,5 @@ input DemoInput {
   version: String!
 }
 type Mutation {
-  addDemo(input: DemoInput!): demo
+  addDemo(input: DemoInput!): demo @aws_iam
 }

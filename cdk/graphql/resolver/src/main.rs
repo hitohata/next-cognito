@@ -18,15 +18,23 @@ struct Response {
 /// There are some code example in the following URLs:
 /// - https://github.com/awslabs/aws-lambda-rust-runtime/tree/main/examples
 /// - https://github.com/aws-samples/serverless-rust-demo/
-async fn function_handler(_event: LambdaEvent<Value>) -> Result<Value, Error> {
+async fn function_handler(event: LambdaEvent<Value>) -> Result<Value, Error> {
     // Extract some useful info from the request
     // let command = event.payload.command;
 
-    // Prepare the response
-    let resp = json!(vec![Response {
+    let field_name = event.payload["info"]["fieldName"].to_owned();
+
+    let response = Response {
         id: String::from("1"),
         version: String::from("version"),
-    }]);
+    };
+
+    if field_name == json!("addDemo") {
+        return Ok(json!(response))
+    }
+
+    // Prepare the response
+    let resp = json!(vec![response]);
 
     // Return `Response` (it will be serialized to JSON automatically by the runtime)
     Ok(resp)

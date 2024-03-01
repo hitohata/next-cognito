@@ -25,14 +25,16 @@ export class CdkStack extends cdk.Stack {
 		super(scope, id, props);
 
 		const preSignupFunction = this.preSignupFunction();
-		const userPool = this.userPool(preSignupFunction);
+		const postSignupFunction = this.postSignupFunction();
+		const userPool = this.userPool(preSignupFunction, postSignupFunction);
 		this.userPoolClient(userPool);
 		this.addGoogleAuth(userPool);
 		const api = this.appSync(userPool);
 		this.resolvers(api);
+		this.gqlClient(api);
 	}
 
-	userPool(preSignupFunction: NodejsFunction) {
+	userPool(preSignupFunction: NodejsFunction, postSignupFunction: NodejsFunction) {
 		const userPool = new UserPool(this, "UserPool", {
 			userPoolName: "next-cog",
 			selfSignUpEnabled: true,
@@ -52,6 +54,7 @@ export class CdkStack extends cdk.Stack {
 			removalPolicy: RemovalPolicy.DESTROY,
 			lambdaTriggers: {
 				preSignUp: preSignupFunction,
+				postConfirmation: postSignupFunction,
 			},
 		});
 
@@ -65,7 +68,6 @@ export class CdkStack extends cdk.Stack {
 							"cognito-idp:AdminConfirmSignUp",
 							"cognito-idp:AdminCreateUser",
 							"cognito-idp:AdminSetUserPassword",
-							"cognito-idp:AdminUpdateUserAttributes",
 						],
 						resources: [userPool.userPoolArn],
 					}),
@@ -146,6 +148,11 @@ export class CdkStack extends cdk.Stack {
 						userPool,
 					},
 				},
+				additionalAuthorizationModes: [
+					{
+						authorizationType: appsync.AuthorizationType.IAM
+					}
+				]
 			},
 		});
 	}
@@ -164,6 +171,10 @@ export class CdkStack extends cdk.Stack {
 			typeName: "Query",
 			fieldName: "getDemos",
 		});
+		dataSource.createResolver("add-demos", {
+			typeName: "Mutation",
+			fieldName: "addDemo",
+		});
 	}
 
 	preSignupFunction() {
@@ -178,5 +189,52 @@ export class CdkStack extends cdk.Stack {
 			),
 			timeout: Duration.seconds(5),
 		});
+	}
+
+	postSignupFunction() {
+		return new NodejsFunction(this, "post-confirmation-function", {
+			functionName: "post-confirmation-function",
+			entry: path.join(__dirname, "../lambda/signup/src/index.ts"),
+			handler: "handler",
+			runtime: Runtime.NODEJS_20_X,
+			depsLockFilePath: path.join(
+				__dirname,
+				"../lambda/signup/package-lock.json",
+			),
+			timeout: Duration.seconds(5),
+		})
+	}
+
+	gqlClient(api: GraphqlApi) {
+		const client = new NodejsFunction(this, "iamAppSyncClient", {
+			functionName: "iam-app-sync-client",
+			entry: path.join(__dirname, "../lambda/iamAppSync/src/index.ts"),
+			handler: "handler",
+			runtime: Runtime.NODEJS_20_X,
+			depsLockFilePath: path.join(
+				__dirname,
+				"../lambda/iamAppSync/package-lock.json",
+			),
+			timeout: Duration.seconds(5),
+			environment: {
+				URL: api.graphqlUrl
+			}
+		});
+
+		client.role?.attachInlinePolicy(
+			new iam.Policy(this, "iam-app-sync-policy", {
+				statements: [
+					new iam.PolicyStatement({
+						actions: ['appsync:GraphQL'],
+						resources: [`${api.arn}/*`]
+					})
+				]
+			})
+		)
+
+		// const role = new iam.Role(this, "role", {
+		// 	assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com")
+		// });
+		// api.grant(role, appsync.IamResource.custom("types/Mutation/fields/addDemo"), 'appsync:GraphQL')
 	}
 }

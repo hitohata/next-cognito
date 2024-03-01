@@ -8,9 +8,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="76c2b526-c6fa-4a2b-a03e-cdf904f33b0c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../schema.graphql" beforeDir="false" afterPath="$PROJECT_DIR$/../schema.graphql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../lib/cdk-stack.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../../lib/cdk-stack.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,6 +99,7 @@
       <workItem from="1708978113105" duration="757000" />
       <workItem from="1708996435692" duration="84000" />
       <workItem from="1708996712647" duration="124000" />
+      <workItem from="1709263304058" duration="80000" />
     </task>
     <servers />
   </component>
