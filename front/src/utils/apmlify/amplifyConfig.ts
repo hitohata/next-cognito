@@ -23,7 +23,7 @@ export const amplifyConfig: ResourcesConfig = {
 			    scopes: ['openid'],
 			    responseType: 'code',
 			    redirectSignIn: [LOCALHOST_URL + '/login'],
-			    redirectSignOut: [LOCALHOST_URL, OAUTH_REDIRECT_URL],
+			    redirectSignOut: [LOCALHOST_URL + '/login', `https://${OAUTH_DOMAIN}`],
 			  },
 			},
 		},

@@ -1,6 +1,6 @@
 import * as path from "node:path";
 import * as cdk from "aws-cdk-lib";
-import { RemovalPolicy } from "aws-cdk-lib";
+import {Duration, RemovalPolicy} from "aws-cdk-lib";
 import * as appsync from "aws-cdk-lib/aws-appsync";
 import { GraphqlApi } from "aws-cdk-lib/aws-appsync";
 import {
@@ -16,20 +16,24 @@ import {
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { RustFunction } from "cargo-lambda-cdk";
 import { Construct } from "constructs";
+import {NodejsFunction} from "aws-cdk-lib/aws-lambda-nodejs";
+import {Runtime} from "aws-cdk-lib/aws-lambda";
+import * as iam from "aws-cdk-lib/aws-iam";
 
 export class CdkStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id, props);
 
-		const userPool = this.userPool();
+		const preSignupFunction = this.preSignupFunction();
+		const userPool = this.userPool(preSignupFunction);
 		this.userPoolClient(userPool);
 		this.addGoogleAuth(userPool);
 		const api = this.appSync(userPool);
 		this.resolvers(api);
 	}
 
-	userPool() {
-		return new UserPool(this, "UserPool", {
+	userPool(preSignupFunction: NodejsFunction) {
+		const userPool = new UserPool(this, "UserPool", {
 			userPoolName: "next-cog",
 			selfSignUpEnabled: true,
 			signInAliases: {
@@ -46,7 +50,26 @@ export class CdkStack extends cdk.Stack {
 			},
 			accountRecovery: AccountRecovery.EMAIL_ONLY,
 			removalPolicy: RemovalPolicy.DESTROY,
+			lambdaTriggers: {
+				preSignUp: preSignupFunction
+			}
 		});
+
+		preSignupFunction.role?.attachInlinePolicy(new iam.Policy(this, "pre-signup-policy", {
+			statements: [new iam.PolicyStatement({
+				actions: [
+					"cognito-idp:ListUsers",
+					"cognito-idp:AdminLinkProviderForUser",
+					"cognito-idp:AdminConfirmSignUp",
+					"cognito-idp:AdminCreateUser",
+					"cognito-idp:AdminSetUserPassword",
+					"cognito-idp:AdminUpdateUserAttributes"
+				],
+				resources: [userPool.userPoolArn],
+			})],
+		}))
+
+		return userPool
 	}
 
 	userPoolClient(userPool: UserPool) {
@@ -57,7 +80,6 @@ export class CdkStack extends cdk.Stack {
 				UserPoolClientIdentityProvider.COGNITO,
 			],
 			authFlows: {
-				userPassword: true,
 				userSrp: true,
 			},
 			oAuth: {
@@ -74,6 +96,9 @@ export class CdkStack extends cdk.Stack {
 					"http://localhost:3000/login",
 					"https://next-auth-testtesttesttest.auth.us-west-2.amazoncognito.com",
 				],
+				logoutUrls: [
+					"http://localhost:3000/login",
+				]
 			},
 		});
 	}
@@ -99,6 +124,9 @@ export class CdkStack extends cdk.Stack {
 			attributeMapping: {
 				email: ProviderAttribute.GOOGLE_EMAIL,
 				nickname: ProviderAttribute.GOOGLE_NAME,
+				custom: {
+					email_verified: ProviderAttribute.other("email_verified"),
+				}
 			},
 		});
 	}
@@ -134,5 +162,16 @@ export class CdkStack extends cdk.Stack {
 			typeName: "Query",
 			fieldName: "getDemos",
 		});
+	}
+
+	preSignupFunction() {
+		return new NodejsFunction(this, "pre-signup-function", {
+			functionName: "pre-signup-function",
+			entry: path.join(__dirname, "../lambda/preSignup/src/index.ts"),
+			handler: "handler",
+			runtime: Runtime.NODEJS_20_X,
+			depsLockFilePath: path.join(__dirname, "../lambda/preSignup/package-lock.json"),
+			timeout: Duration.seconds(5)
+		})
 	}
 }
