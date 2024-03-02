@@ -108,7 +108,7 @@ export class CdkStack extends cdk.Stack {
 				],
 				logoutUrls: [
 					"http://localhost:3000/login",
-					"https://next-cognito-phi.vercel.app/login"
+					"https://next-cognito-phi.vercel.app/login",
 				],
 			},
 		});
