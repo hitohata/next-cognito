@@ -1,6 +1,7 @@
 directive @aws_iam on FIELD_DEFINITION
+directive @aws_cognito_user_pools on FIELD_DEFINITION
 
-type demo @aws_iam {
+type demo @aws_cognito_user_pools @aws_iam {
   id: String!
   version: String!
 }

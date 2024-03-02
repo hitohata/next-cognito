@@ -35,14 +35,18 @@ export default async function SSRPage() {
      return (
          <>
              <SignOutButton />
-             <div>Server Side Rendering</div>
-             {data.getDemos?.map((el, index) => (
-                     <div key={index}>
-                         <DemoComponent {...el} />
-                     </div>
-                 )
-             )}
-             <ClientDemos />
+             <div className={"bg-sky-400"}>
+                 <div>Server Side Rendering</div>
+                 {data.getDemos?.map((el, index) => (
+                         <div key={index}>
+                             <DemoComponent {...el} />
+                         </div>
+                     )
+                 )}
+             </div>
+             <div className={"bg-emerald-400"}>
+                 <ClientDemos />
+             </div>
          </>
      )
 }

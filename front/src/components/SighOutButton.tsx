@@ -15,6 +15,6 @@ export const SignOutButton = () => {
     }
 
     return (
-        <button onClick={ handleSignOut }>Sign Out</button>
+        <button className={"bg-red-500"} onClick={ handleSignOut }>Sign Out</button>
     )
 }

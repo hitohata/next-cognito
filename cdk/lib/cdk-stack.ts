@@ -223,21 +223,21 @@ export class CdkStack extends cdk.Stack {
 				URL: api.graphqlUrl,
 			},
 		});
+		//
+		// client.role?.attachInlinePolicy(
+		// 	new iam.Policy(this, "iam-app-sync-policy", {
+		// 		statements: [
+		// 			new iam.PolicyStatement({
+		// 				actions: ["appsync:GraphQL"],
+		// 				resources: [`${api.arn}/*`],
+		// 			}),
+		// 		],
+		// 	}),
+		// );
 
-		client.role?.attachInlinePolicy(
-			new iam.Policy(this, "iam-app-sync-policy", {
-				statements: [
-					new iam.PolicyStatement({
-						actions: ["appsync:GraphQL"],
-						resources: [`${api.arn}/*`],
-					}),
-				],
-			}),
-		);
-
-		// const role = new iam.Role(this, "role", {
-		// 	assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com")
-		// });
-		// api.grant(role, appsync.IamResource.custom("types/Mutation/fields/addDemo"), 'appsync:GraphQL')
+		const role = new iam.Role(this, "role", {
+			assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com")
+		});
+		api.grant(role, appsync.IamResource.custom("/*"), 'appsync:GraphQL')
 	}
 }
