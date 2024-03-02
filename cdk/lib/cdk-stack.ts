@@ -103,9 +103,13 @@ export class CdkStack extends cdk.Stack {
 				],
 				callbackUrls: [
 					"http://localhost:3000/login",
+					"https://next-cognito-phi.vercel.app/login",
 					"https://next-auth-testtesttesttest.auth.us-west-2.amazoncognito.com",
 				],
-				logoutUrls: ["http://localhost:3000/login"],
+				logoutUrls: [
+					"http://localhost:3000/login",
+					"https://next-cognito-phi.vercel.app/login"
+				],
 			},
 		});
 	}
@@ -223,21 +227,10 @@ export class CdkStack extends cdk.Stack {
 				URL: api.graphqlUrl,
 			},
 		});
-		//
-		// client.role?.attachInlinePolicy(
-		// 	new iam.Policy(this, "iam-app-sync-policy", {
-		// 		statements: [
-		// 			new iam.PolicyStatement({
-		// 				actions: ["appsync:GraphQL"],
-		// 				resources: [`${api.arn}/*`],
-		// 			}),
-		// 		],
-		// 	}),
-		// );
 
 		const role = new iam.Role(this, "role", {
-			assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com")
+			assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
 		});
-		api.grant(role, appsync.IamResource.custom("/*"), 'appsync:GraphQL')
+		api.grant(role, appsync.IamResource.custom("/*"), "appsync:GraphQL");
 	}
 }
